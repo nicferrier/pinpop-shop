@@ -7,10 +7,15 @@
     <body>
         <h1>ecom</h1>
         <div id="capture"></div>
+        <div id="images"></div>
         <div id="formHolder">
             <form method="POST">
                 <input type="text" name="name" placeHolder="name of the item"></input><br/>
-                <input type="text" name="price" placeHolder="price"></input>
+                <input type="text" 
+                       name="price" 
+                       pattern="^[0-9]+"
+                       title="how much does it cost?"
+                       placeHolder="price"></input>
                 <br/>
                 <textarea name="description" 
                           rows="10"

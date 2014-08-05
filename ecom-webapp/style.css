@@ -1,7 +1,30 @@
+.hidden {
+    display: none;
+}
+
 body {
     font-family: sans-serif;
 }
 
+#capture {
+    width: 600px;
+    height: 455px;
+}
+
+#vid {
+    width: 600px;
+    border: none;
+}
+
+#capture img {
+}
+
+#images {
+    height: 100px;
+    overflow-x: true;
+    background: #bbbbbb;
+    margin-bottom: 25px;
+}
 
 #formHolder {
     width: 50%;
