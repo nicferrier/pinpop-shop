@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8"></meta>
+        <link rel="stylesheet" href="/style.css" type="text/css"></link>
+    </head>
+    <body>
+        <h1>ecom</h1>
+        <div id="capture"></div>
+        <div id="formHolder">
+            <form method="POST">
+                <input type="text" name="name" placeHolder="name of the item"></input><br/>
+                <select name="currency">
+                    <option selected="yes" value="GBP">£ - GBP</option>
+                    <option value="USD">$ - USD</option>
+                </select>
+                <input type="text" name="price" placeHolder="price"></input>
+                <br/>
+                <textarea name="description" 
+                          rows="10"
+                          placeHolder="describe this item"></textarea>
+            </form>
+        </div>
+    </body>
+    <script src="/scripts/app.js"></script>
+</html>
