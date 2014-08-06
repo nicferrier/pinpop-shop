@@ -31,12 +31,14 @@ function cameraSnap (videoObject) {
   var img = $("#capture img");
   img.on("dragstart", function () { return false; });
   var mc = Hammer(img[0]);
-  mc.on(
-    "swipeleft", 
-    function () { 
-      alert("swiped!"); 
-    }
-  );
+  mc.on("swipeleft", 
+        function () {
+          // This should be a history.pushState thing so the user can
+          // use the back button or keys
+          $("#capture img").addClass("hidden");
+          $("#inventoryForm").removeClass("hidden");
+        });
+
 }
 
 function cameraOn () {
