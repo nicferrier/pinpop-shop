@@ -1,6 +1,7 @@
 var util = require("util");
 var $ = require("jquery"); window.$ = $; //useful
 var userMedia = require("./userMedia.js");
+var Hammer = require("hammerjs");
 var formSaver = require ("./formSaver.js");
 
 function cameraOn () {
@@ -9,6 +10,8 @@ function cameraOn () {
   userMedia.doGetUserMedia(
     videoObject,
     function () {
+      var mc = Hammer(videoObject);
+      mc.on("swipeleft swiperight", function () { console.log("swiped!"); });
       $(videoObject).click(function () {
         var canvasElement = document.createElement("canvas");
         canvasElement.setAttribute("class", "hidden");
@@ -38,6 +41,7 @@ cameraOn();
 
 // not sure about "change" - it doesn't tell us very quickly
 formSaver.attach(document.forms["inventory"]);
+
 
 
 // app.js ends here
