@@ -91,6 +91,9 @@ function getUserMediaWithStream(videoObject, onSuccess, streamId) {
       navigator.webkitGetUserMedia(
         constraints,
         function (stream) {
+          // Add a specific "stream" property for WebKit to stop the
+          // stream later
+          videoObject.stream = stream;
           streamSuccess(stream, videoObject, "webkit", onSuccess);
         },
         error);
@@ -100,6 +103,8 @@ function getUserMediaWithStream(videoObject, onSuccess, streamId) {
         navigator.mozGetUserMedia(
           constraints,
           function (stream) {
+            // No need for the stream property on moz coz moz can't
+            // stop a stream that way
             streamSuccess(stream, videoObject, "moz", onSuccess);
           }, 
           error);
@@ -123,11 +128,19 @@ function stopCapture (videoObject) {
     videoObject.mozSrcObject = null;
   }
   catch (e) {
+    // No matter, probably not FF
+  }
+  try {
     try {
-      videoObject.src = "";
+      videoObject.stream.stop();
     }
     catch (e) {
+      // Never mind.
     }
+    videoObject.src = "";
+  }
+  catch (e) {
+    // Getting tedious.
   }
 };
 
