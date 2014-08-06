@@ -19,11 +19,13 @@ function cameraOn () {
         canvasElement.height = height;
         var graphicContext = canvasElement.getContext("2d");
         graphicContext.clearRect(0, 0, width, height);
-        graphicContext.drawImage(videoObject, 0, 0);
+        graphicContext.drawImage(videoObject, 0, 0, width, height);
         userMedia.stopCapture(document.getElementById("vid"));
         $("#capture").append(
-          util.format("<img src=\"%s\" title=\"click again to take another\"></img>", 
-                      canvasElement.toDataURL())
+          util.format(
+            "<img src=\"%s\" title=\"click again to take another\"></img>", 
+            canvasElement.toDataURL()
+          )
         );
         $(videoObject).addClass("hidden");
       });

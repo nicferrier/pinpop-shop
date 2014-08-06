@@ -6,14 +6,13 @@ body {
     font-family: sans-serif;
 }
 
-#capture {
-    width: 600px;
-    height: 455px;
+#panel {
+    width: 400px;
+    height: 300px;
 }
 
 #vid {
-    width: 600px;
-    border: none;
+    width: 400px;
 }
 
 #capture img {
@@ -27,11 +26,11 @@ body {
 }
 
 #formHolder {
-    width: 50%;
+    width: 100%;
 }
 
 #formHolder form {
-    width: 60%;
+    width: 100%;
 }
 
 #formHolder input[name=name] {

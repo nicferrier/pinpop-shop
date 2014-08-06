@@ -2,25 +2,28 @@
 <html>
     <head>
         <meta charset="UTF-8"></meta>
+        <meta name="viewport" content="width=450,user-scalable=no"></meta>
         <link rel="stylesheet" href="/style.css" type="text/css"></link>
     </head>
     <body>
-        <h1>ecom</h1>
-        <div id="capture"></div>
-        <div id="images"></div>
-        <div id="formHolder">
-            <form method="POST">
-                <input type="text" name="name" placeHolder="name of the item"></input><br/>
-                <input type="text" 
-                       name="price" 
-                       pattern="^[0-9]+"
-                       title="how much does it cost?"
-                       placeHolder="price"></input>
-                <br/>
-                <textarea name="description" 
-                          rows="10"
-                          placeHolder="describe this item"></textarea>
-            </form>
+        <div id="panel">
+            <h1>ecom</h1>
+            <div id="capture"></div>
+            <div id="images" class="hidden"></div>
+            <div id="formHolder">
+                <form name="inventory" method="POST">
+                    <input type="text" name="name" placeHolder="name of the item"></input><br/>
+                    <input type="text" 
+                           name="price" 
+                           pattern="^[0-9]+(\.[0-9]{2})"
+                           title="how much does it cost?"
+                           placeHolder="price"></input>
+                    <br/>
+                    <textarea name="description" 
+                              rows="10"
+                              placeHolder="describe this item"></textarea>
+                </form>
+            </div>
         </div>
     </body>
     <script src="/scripts/app.js"></script>
