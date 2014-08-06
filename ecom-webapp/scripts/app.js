@@ -5,7 +5,7 @@ var Hammer = require("hammerjs");
 var formSaver = require ("./formSaver.js");
 
 function cameraOn () {
-  $("#capture").html("<video id='vid'></video>");
+  $("#capture").html("<video id='vid' autoplay=\"yes\"></video>");
   var videoObject = document.getElementById("vid");
   userMedia.doGetUserMedia(
     videoObject,
