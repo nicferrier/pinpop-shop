@@ -1,6 +1,7 @@
 var util = require("util");
 var $ = require("jquery"); window.$ = $; //useful
 var userMedia = require("./userMedia.js");
+var formSaver = require ("./formSaver.js");
 
 function cameraOn () {
   $("#capture").html("<video id='vid'></video>");
@@ -36,6 +37,7 @@ function cameraOn () {
 cameraOn();
 
 // not sure about "change" - it doesn't tell us very quickly
-$("#formHolder form").change(function (evt) {
-  console.log("something changed");
-});
+formSaver.attach(document.forms["inventory"]);
+
+
+// app.js ends here
