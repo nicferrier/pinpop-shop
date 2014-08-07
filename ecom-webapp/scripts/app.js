@@ -5,6 +5,7 @@ var Hammer = require("hammerjs");
 var formSaver = require ("./formSaver.js");
 
 function cameraSnap (videoObject) {
+  // FIXME - should probably play a camera shutter sound
   var canvasElement = document.createElement("canvas");
   canvasElement.setAttribute("class", "hidden");
   document.body.appendChild(canvasElement);;

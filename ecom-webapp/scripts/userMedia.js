@@ -124,6 +124,7 @@ function doGetUserMedia (videoObject, onSuccess) {
 
 function stopCapture (videoObject) {
   videoObject.pause();
+  // FIXME: convert to object key tests
   try {
     videoObject.mozSrcObject = null;
   }
