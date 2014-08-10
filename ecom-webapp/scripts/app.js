@@ -4,6 +4,13 @@ var userMedia = require("./userMedia.js");
 var Hammer = require("hammerjs");
 var formSaver = require ("./formSaver.js");
 
+function uuid () {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+    return v.toString(16);
+  });
+}
+
 function cameraSnap (videoObject) {
   // FIXME - should probably play a camera shutter sound
   var canvasElement = document.createElement("canvas");
@@ -27,6 +34,18 @@ function cameraSnap (videoObject) {
       imgData
     )
   );
+
+  var myUuid = uuid();
+  $.ajax("/item/" + myUuid, {
+    type: "POST",
+    data: { image: imgData },
+    error: function (jqXHR, textStatus, errorThrown) {
+      // FIXME: handle errors sensibly
+      console.log(util.format(
+        "item POST error: uuid: %s textStatus: %s", myUuid, textStatus
+      ));
+    }
+  });
   $(videoObject).addClass("hidden");
 
   var img = $("#capture img");
@@ -55,9 +74,11 @@ function cameraOn () {
   );
 }
 
+// Start saving the form
+formSaver.attach(document.forms["inventory"]);
+
+// Start the camera
 cameraOn();
 
-// not sure about "change" - it doesn't tell us very quickly
-formSaver.attach(document.forms["inventory"]);
 
 // app.js ends here
