@@ -56,9 +56,9 @@ function cameraSnap (videoObject) {
           // This should be a history.pushState thing so the user can
           // use the back button or keys
           $("#capture img").addClass("hidden");
+          $("#inventoryForm form").attr("action", "/item/" + myUuid); // template?
           $("#inventoryForm").removeClass("hidden");
         });
-
 }
 
 function cameraOn () {
