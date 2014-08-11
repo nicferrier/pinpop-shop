@@ -13,7 +13,6 @@ function sendForm (form) {
       form["formSaver__ajaxSaverFn"](form);
     }
     else {
-      console.log("sendForm - default sender - %s", form.action);
       $.ajax(form.action, {
         method: form.method || "POST",
         dataType: "json",
