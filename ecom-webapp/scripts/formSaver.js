@@ -1,3 +1,12 @@
+// formSaver.js -- for sending forms asynchronously
+
+// This is for asynchronous forms. All saves occur in the
+// background. You can collect the status of the send and do something
+// with it.
+//
+// This is for building form UIs where the network might go away or
+// anything else might prevent the actual sending.
+
 var util = require("util");
 var $ = require("jquery");
 
@@ -5,69 +14,77 @@ var tainted = {};
 var taintWatcher;
 var WATCHER_TIMEOUT=1000;
 
-// Send the form using Ajax
-function sendForm (form) {
-  if (form.checkValidity()) {
-    console.log("sendForm has valid");
-    if (form.hasOwnProperty("formSaver__ajaxSaverFn")) {
-      form["formSaver__ajaxSaverFn"](form);
-    }
-    else {
-      $.ajax(form.action, {
-        method: form.method || "POST",
-        dataType: "json",
-        data: $(form).serialize(),
-        success: function () {
-          console.log("sendForm - default success");
-          console.log("sendForm success!");
-        }
-      });
-    }
-  }
-}
-
 // Used to scan the tainted forms and send them
 //
 // setTimeout's itself when it's done.
 function taintScanner () {
-  var forms = Object.keys(tainted).map(function (key) {
-    return { form: tainted[key], formKey: key };
+  var taintedList = Object.keys(tainted).map(function (key) {
+    return { thunk: tainted[key], key: key };
   });
-  forms.forEach(function (formObj) {
-    sendForm(formObj.form);
-    delete tainted[formObj.formKey];
+  taintedList.forEach(function (taintObj) {
+    delete tainted[taintObj.key];
+    taintObj.thunk();
   });
   taintWatcher = window.setTimeout(taintScanner, WATCHER_TIMEOUT);
 }
 
-// The main programmer user interface, attach a saver to a form object
+// Push key onto the taint queue, to be processed with thunk
+function taint (key, thunk) {
+  tainted[key] = thunk;
+  
+  // Check if we have a running taintWatcher process and start if not
+  if (taintWatcher == null) {
+    taintWatcher = window.setTimeout(taintScanner, WATCHER_TIMEOUT);
+  }
+};
+
+// Make a thunk to send a form using jquery - this can be used as an
+// argument to 'attach'.
 //
-// 'form' must be a real form object from the DOM, not a jQuery object
-//
-// 'ajaxSaver' is optional, if present it's a function that will be
-// called to submit the form instead of a standard ajax.  'ajaxSaver'
-// is always passed the form object. The 'ajaxSaver' is achieved by
-// adding an extra property to the form object. This must be supported
-// by the DOM for the feature to work.
-//
-// the standard ajaxSaver is inside function `sendForm`. It expects a
-// dataType of JSON and does nothing on success or failure.
-function attachSaver(form, ajaxSaver) {
-  var target = form.target;
-  // Taint the 
-  form.addEventListener("keydown", function (evt) {
-    var key = form.id || form.name;
-    tainted[key] = form;
-    if (ajaxSaver) {
-      form.formSaver__ajaxSaverFn = ajaxSaver;
+// A success function can be supplied, it is passed the response data
+// and the origin form. A default that logs to the console is used.
+function sendFormJquery (form, success) {
+  function ajaxSuccess(data, form) {
+    console.log(util.format(
+      "sendFormJquery success %s [%s]",
+      data, form));
+  };
+  return function () { // the thunk you
+    if (form.checkValidity()) {
+      $.ajax(form.action, {
+        type: form.method || "POST",
+        dataType: "json",
+        data: $(form).serialize(),
+        success: function (data) {
+          var originForm = form;
+          (success || ajaxSuccess)(data, originForm);
+        }
+        // FIX-ME - we need an error handler that re-taints
+      });
     }
-    // Check if we have a running taintWatcher process and start if not
-    if (taintWatcher == null) {
-      taintWatcher = window.setTimeout(taintScanner, WATCHER_TIMEOUT);
-    }
-  });
+  };
 }
 
-exports.attach = attachSaver;
+// When 'form' changes queue an action for it
+//  
+// form is an HTML Form object
+//
+// actionThunk is an optional processor thunk to save the form, by
+// default sendFormJquery(form) is used.
+function attach(form, actionThunk) {
+  var handler = function (evt) { 
+    taint(
+      form.id || form.name || form.action, 
+      actionThunk || sendFormJquery(form)
+    ); 
+  };
+  // Taint the form when an event happens
+  form.addEventListener("keydown", handler);
+  form.addEventListener("change", handler);
+}
+
+exports.taint = taint;
+exports.sendFormJquery = sendFormJquery;
+exports.attach = attach;
 
 // formSaver.js ends here

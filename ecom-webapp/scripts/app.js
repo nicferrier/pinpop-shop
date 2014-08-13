@@ -4,14 +4,53 @@ var userMedia = require("./userMedia.js");
 var Hammer = require("hammerjs");
 var formSaver = require ("./formSaver.js");
 
-function uuid () {
+function UUID() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+      var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
     return v.toString(16);
   });
 }
 
-function cameraSnap (videoObject) {
+function saveImage(imgData) {
+  var uuid = UUID(); // this is for the item
+  var imgUuid = UUID(); // this is for this individual image
+
+  var form = $("#inventoryForm form")[0];
+  form.setAttribute("action", "/item/" + uuid); // this should be template
+
+  // Start saving the form with a success which will add the image(s)
+  formSaver.attach(
+    form,
+    formSaver.sendFormJquery(form, function (data, originForm) {
+      console.log("success for form save - not try images");
+      // We *might* want to use the originForm id as the taint key
+      // this might let us tie the image uploads to the item uploads
+      formSaver.taint(imgUuid, function () {
+        $.ajax("/item/" + uuid + "/image/" + imgUuid, {
+          type: "POST",
+          dataType: "json",
+          data: { "image-data": imgData }, // could have meta data too!
+          success: function (data) {
+            console.log("image uploaded!");
+          }
+        });
+      });
+    }));
+
+  var img = $("#capture img");
+  img.on("dragstart", function () { return false; });
+  var mc = Hammer(img[0]);
+  mc.on("swipeleft", 
+        function () {
+          // This should be a history.pushState thing so the user can
+          // use the back button or keys
+          $("#capture img").addClass("hidden");
+          $("#inventoryForm").removeClass("hidden");
+        });
+}
+
+// Snap the 'videoObject' and call 'next' with the imgData
+function cameraSnap (videoObject, next) {
   // FIXME - should probably play a camera shutter sound
   var canvasElement = document.createElement("canvas");
   canvasElement.setAttribute("class", "hidden");
@@ -34,33 +73,10 @@ function cameraSnap (videoObject) {
       imgData
     )
   );
-
-  var myUuid = uuid();
-  $.ajax("/item/" + myUuid, {
-    type: "POST",
-    data: { image: imgData },
-    error: function (jqXHR, textStatus, errorThrown) {
-      // FIXME: handle errors sensibly
-      console.log(util.format(
-        "item POST error: uuid: %s textStatus: %s", myUuid, textStatus
-      ));
-    }
-  });
   $(videoObject).addClass("hidden");
-
-  var img = $("#capture img");
-  img.on("dragstart", function () { return false; });
-  var mc = Hammer(img[0]);
-  mc.on("swipeleft", 
-        function () {
-          // This should be a history.pushState thing so the user can
-          // use the back button or keys
-          $("#capture img").addClass("hidden");
-          $("#inventoryForm form").attr("action", "/item/" + myUuid); // template?
-          $("#inventoryForm").removeClass("hidden");
-        });
+  next(imgData)
 }
-
+// Turn the camera on and call cameraSnap with saveImage on click
 function cameraOn () {
   $("#capture").html("<video id='vid' autoplay=\"yes\"></video>");
   var videoObject = document.getElementById("vid");
@@ -68,17 +84,13 @@ function cameraOn () {
     videoObject,
     function () {
       $(videoObject).click(function () {
-        cameraSnap(videoObject);
+        cameraSnap(videoObject, saveImage);
       });
     }
   );
 }
 
-// Start saving the form
-formSaver.attach(document.forms["inventory"]);
-
 // Start the camera
 cameraOn();
-
 
 // app.js ends here

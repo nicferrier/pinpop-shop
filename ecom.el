@@ -2,8 +2,7 @@
 
 (require 'elnode)
 (require 'json)
-(require 'ibuf-macs)
-(defalias 'aif 'ibuffer-aif)
+(require 's)
 
 (defconst ecom/docroot (expand-file-name "ecom-webapp")
   "The root of our webapp.")
@@ -11,67 +10,46 @@
 (defconst ecom/datadir (expand-file-name "data")
   "Where we store all the data.")
 
-(defun ecom/expand-item (item)
-  "Expand the ITEM into a path under `ecom/datadir'.
-
-Makes sure ITEM is clean of any artifact that could be dangerous.
-The directory structure is made if necessary."
-  (let ((fq-images
-         (expand-file-name
-          "images"
-          (expand-file-name 
-           (file-name-sans-extension
-            (file-name-nondirectory item))
-           ecom/datadir))))
-    ;; Just ignore any errors
-    (condition-case err
-        (make-directory (file-name-as-directory fq-images) t)
-      (file-already-exists nil))
-    (file-name-directory fq-images)))
-
-(defun expand-file-under-docroot (file dir docroot)
-  "Expand FiLE under DIR but return what's not under DOCROOT.
-
-For example:
-
-  docroot    dir       file     result
-  /a/b/c     /a/b/c/d  e        d/e
-  /a/b/c     d         e        d/e
-"
-  (save-match-data
-    (let ((str (expand-file-name file (expand-file-name dir docroot))))
-      (string-match
-       (concat (file-name-as-directory docroot) "\\(.*\\)")
-       str)
-      (match-string 1 str))))
-
 (defun ecom-item (httpcon)
+  "Handle item posts."
+  (let* ((uuid (elnode-http-mapping httpcon 1))
+         (path (concat uuid "/data"))
+         (file (expand-file-name path ecom/datadir)))
+    (elnode-method httpcon
+      (GET
+       (when (elnode-under-docroot-p file ecom/datadir t)
+         (with-temp-buffer
+           (insert-file-contents-literally file)
+           (elnode-send-json httpcon (progn (goto-char (point-min))(json-read))))))
+      (POST
+       (if (not (elnode-under-docroot-p file ecom/datadir t))
+           (elnode-send-400 httpcon "Bad path")
+           ;; Else save it
+           (let* ((params (elnode-http-params httpcon)))
+             (make-directory (file-name-directory file) t)
+             (with-temp-file file (insert (format "%s" (json-encode params))))
+             (elnode-send-redirect httpcon path)))))))
+
+(defun ecom-item-image (httpcon)
+  "Handle item image uploads."
   (elnode-method httpcon
+    (GET (elnode-send-json httpcon '("Ok")))
     (POST
-     (let* ((uuid (elnode-http-mapping httpcon 1)) ; FIXME - check the UUID
-            (params (elnode-http-params httpcon))
-            (uuid-dir (ecom/expand-item uuid))
-            (image (kva "image" params)))
-       (if image
-           (let ((image-file
-                  (expand-file-name 
-                   (format-time-string "%Y%m%d%H%M%S%N" (current-time))
-                   (expand-file-name "images" uuid-dir)))
-                 (coding-system-for-write 'raw-text))
-             (with-temp-file image-file (insert image))
-             (elnode-send-redirect
-              httpcon
-              (concat
-               "/item/"
-               (expand-file-under-docroot image-file uuid-dir ecom/datadir))))
-           ;; Must be data
-           (with-temp-file (expand-file-name "data" uuid-dir)
-             (insert (format "%s" (json-encode params))))
-           (elnode-send-redirect
-            httpcon
-            (concat
-             "/item/"
-             (expand-file-under-docroot "data" uuid-dir ecom/datadir))))))))
+     (let* ((item-uuid (elnode-http-mapping httpcon 1))
+            (image-uuid (elnode-http-mapping httpcon 2))
+            (image-data (elnode-http-param httpcon "image-data"))
+            (image-path (s-format
+                         "${item-uuid}/images/${image-uuid}" 'aget
+                         `(("item-uuid" . ,item-uuid)
+                           ("image-uuid" . ,image-uuid))))
+            (image-file (expand-file-name image-path ecom/datadir))
+            (coding-system-for-write 'raw-text))
+       (if (not (elnode-under-docroot-p image-file ecom/datadir t))
+           (elnode-send-400 httpcon "Bad path")
+           ;; Else it's ok, save the image and send a redirect
+           (make-directory (file-name-directory image-file) t)
+           (with-temp-file image-file (insert image-data))
+           (elnode-send-status httpcon 201))))))
 
 (defun ecom-ws (httpcon)
   (let ((elnode-send-file-assoc
@@ -83,8 +61,12 @@ For example:
   "Routing for the ecommerce system."
   (elnode-hostpath-dispatcher
    httpcon
-   `(("^[^/]+//item/\\(.*\\)" . ecom-item) ; check the UUID
-     ("^[^/]+//.*" . ecom-ws))))
+   (let ((uuid-pat
+          "\\([[:xdigit:]]\\{8\\}-[[:xdigit:]]\\{4\\}-4[[:xdigit:]]\\{3\\}-[[:xdigit:]]\\{4\\}-[[:xdigit:]]\\{12\\}\\)"))
+     (list
+      (cons (concat "^[^/]+//item/" uuid-pat "/image/" uuid-pat "$") 'ecom-item-image)
+      (cons (concat "^[^/]+//item/" uuid-pat) 'ecom-item)
+      (cons "^[^/]+//.*"  'ecom-ws)))))
 
 (elnode-start 'ecom-router :port 8018 :host "0.0.0.0")
 
