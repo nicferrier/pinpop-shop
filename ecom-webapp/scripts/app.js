@@ -3,6 +3,7 @@ var $ = require("jquery"); window.$ = $; //useful
 var userMedia = require("./userMedia.js");
 var Hammer = require("hammerjs");
 var formSaver = require ("./formSaver.js");
+var Platform = require("polyfill-webcomponents");
 
 function UUID() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -15,8 +16,11 @@ function saveImage(imgData) {
   var uuid = UUID(); // this is for the item
   var imgUuid = UUID(); // this is for this individual image
 
-  var form = $("#inventoryForm form")[0];
+  var formTemplate = $("#inventoryForm")[0];
+  var templFragment = document.importNode(formTemplate.content, true);
+  var form = templFragment.querySelector("form");
   form.setAttribute("action", "/item/" + uuid); // this should be template
+  form.setAttribute("name", uuid);
 
   // Start saving the form with a success which will add the image(s)
   formSaver.attach(
@@ -45,7 +49,8 @@ function saveImage(imgData) {
           // This should be a history.pushState thing so the user can
           // use the back button or keys
           $("#capture img").addClass("hidden");
-          $("#inventoryForm").removeClass("hidden");
+          //$("#inventoryForm").removeClass("hidden");
+          $("#panel").append(form);
         });
 }
 

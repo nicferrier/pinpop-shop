@@ -12,6 +12,7 @@
     "url": "http://nic.ferrier.me.uk"
   },
   "dependencies": {
+    "polyfill-webcomponents": "*",
     "jquery": "2.1.1",
     "hammerjs": "2.0.2",
     "browserify": ">=4.2.0"
