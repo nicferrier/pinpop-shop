@@ -57,12 +57,18 @@
     (elnode--webserver-handler-proc
      httpcon ecom/docroot elnode-webserver-extra-mimetypes)))
 
+(defconst ecom/uuid-pattern
+  (rx (and (= 8 hex-digit) "-"
+           (= 3 (= 4 hex-digit) "-")
+           (= 12 hex-digit)
+           string-end))
+  "A regex to match UUIDs.")
+
 (defun ecom-router (httpcon)
   "Routing for the ecommerce system."
   (elnode-hostpath-dispatcher
    httpcon
-   (let ((uuid-pat
-          "\\([[:xdigit:]]\\{8\\}-[[:xdigit:]]\\{4\\}-4[[:xdigit:]]\\{3\\}-[[:xdigit:]]\\{4\\}-[[:xdigit:]]\\{12\\}\\)"))
+   (let ((uuid-pat ecom/uuid-pattern))
      (list
       (cons (concat "^[^/]+//item/" uuid-pat "/image/" uuid-pat "$") 'ecom-item-image)
       (cons (concat "^[^/]+//item/" uuid-pat) 'ecom-item)
