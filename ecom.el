@@ -3,6 +3,7 @@
 (require 'elnode)
 (require 'json)
 (require 's)
+(require 'rx)
 
 (defconst ecom/docroot (expand-file-name "ecom-webapp")
   "The root of our webapp.")
