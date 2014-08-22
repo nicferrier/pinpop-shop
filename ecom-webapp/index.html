@@ -10,9 +10,15 @@
             <h1>ecom</h1>
             <div id="capture"></div>
             <div id="images" class="hidden"></div>
+            <!--
+                if we ajax in this template the server side can handle the categories
+            -->
             <template id="inventoryForm">
                 <form action="/item/" method="POST">
-                    <input type="text" name="name" placeHolder="name of the item"></input><br/>
+                    <input type="text" 
+                           name="name" 
+                           required="true"
+                           placeHolder="name of the item"></input><br/>
                     <input type="text" 
                            name="price" 
                            required="true"
