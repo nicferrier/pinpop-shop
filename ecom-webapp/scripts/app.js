@@ -19,7 +19,7 @@ function saveImage(imgData) {
   var formTemplate = $("#inventoryForm")[0];
   var templFragment = document.importNode(formTemplate.content, true);
   var form = templFragment.querySelector("form");
-  form.setAttribute("action", "/item/" + uuid); // this should be template
+  form.setAttribute("action", "/item/" + uuid);
   form.setAttribute("name", uuid);
 
   // Start saving the form with a success which will add the image(s)
@@ -49,7 +49,6 @@ function saveImage(imgData) {
           // This should be a history.pushState thing so the user can
           // use the back button or keys
           $("#capture img").addClass("hidden");
-          //$("#inventoryForm").removeClass("hidden");
           $("#panel").append(form);
         });
 }
