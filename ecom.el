@@ -4,6 +4,7 @@
 (require 'json)
 (require 's)
 (require 'rx)
+(require 'file-format)
 
 (defconst ecom/docroot (expand-file-name "ecom-webapp")
   "The root of our webapp.")
@@ -74,7 +75,5 @@
       (cons (concat "^[^/]+//item/" uuid-pat "/image/" uuid-pat "$") 'ecom-item-image)
       (cons (concat "^[^/]+//item/" uuid-pat) 'ecom-item)
       (cons "^[^/]+//.*"  'ecom-ws)))))
-
-(elnode-start 'ecom-router :port 8018 :host "0.0.0.0")
 
 ;;; ecom.el ends here
