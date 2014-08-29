@@ -62,8 +62,7 @@
 (defconst ecom/uuid-pattern
   (rx (group (= 8 hex-digit) "-"
              (= 3 (= 4 hex-digit) "-")
-             (= 12 hex-digit)
-             string-end))
+             (= 12 hex-digit)))
   "A regex to match UUIDs.")
 
 (defun ecom-router (httpcon)
