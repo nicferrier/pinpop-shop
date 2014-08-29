@@ -74,6 +74,7 @@
      (list
       (cons (concat "^[^/]+//item/" uuid-pat "/image/" uuid-pat "$") 'ecom-item-image)
       (cons (concat "^[^/]+//item/" uuid-pat) 'ecom-item)
-      (cons "^[^/]+//.*"  'ecom-ws)))))
+      (cons "^[^/]+//.*"  'ecom-ws)))
+   :log-name "ecom"))
 
 ;;; ecom.el ends here
