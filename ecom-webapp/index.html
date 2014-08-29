@@ -10,11 +10,8 @@
             <h1>ecom</h1>
             <div id="capture"></div>
             <div id="images" class="hidden"></div>
-            <!--
-                if we ajax in this template the server side can handle the categories
-            -->
             <template id="inventoryForm">
-                <form action="/item/" method="POST">
+                <form class="inventoryForm" action="/item/" method="POST">
                     <input type="text" 
                            name="name" 
                            required="true"
@@ -29,7 +26,13 @@
                     <textarea name="description" 
                               rows="10"
                               placeHolder="describe this item"></textarea>
+                    <!-- 
+                         FIXME - add a "valid" hidden field that we record validity in 
+                         
+                         we should send whether valid or not but then record the validity??
+                    -->
                 </form>
+                <hr></hr>
             </template>
         </div>
     </body>

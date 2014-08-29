@@ -25,18 +25,14 @@ body {
     margin-bottom: 25px;
 }
 
-#inventoryForm {
-    width: 100%;
+.inventoryForm {
+    width: 90%;
 }
 
-#inventoryForm form {
-    width: 100%;
+.inventoryForm input[name=name] {
+    width: 90%;
 }
 
-#inventoryForm input[name=name] {
-    width: 100%;
-}
-
-#inventoryForm textarea {
-    width: 100%;
+.inventoryForm textarea {
+    width: 90%;
 }

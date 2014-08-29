@@ -12,16 +12,53 @@ function UUID() {
   });
 }
 
+// List of items we've created.
+var itemsList = new Array();
+var currentItemIndex = -1;
+
+function right () {
+  if (currentItemIndex < 1) {
+    alert("vdu7");
+  }
+  else {
+    console.log("itemsList:", itemsList);
+    itemsList[currentItemIndex].addClass("hidden");
+    itemsList[--currentItemIndex].removeClass("hidden");
+  }
+}
+
+function left () {
+  if (currentItemIndex == itemsList.length - 1) {
+    // FIXME - this should load another video frame
+    // FIXME - the video shouldn't autostart - empty frame that you click in to turn it on
+    alert("vdu7");
+  }
+  else {
+    console.log("itemsList:", itemsList);
+    itemsList[currentItemIndex].addClass("hidden");
+    itemsList[++currentItemIndex].removeClass("hidden");
+  }
+}
+
+var mc = Hammer(document.body);
+mc.on("swipeleft", left);
+mc.on("swiperight", right);
+
+function newForm(uuid) {
+  var formTemplate = $("#inventoryForm")[0];
+  var templFragment = document.importNode(formTemplate.content, true);
+  var form = templFragment.querySelector("form");
+  form.setAttribute("class", (form.getAttribute("class") || "") + " hidden");
+  form.setAttribute("action", "/item/" + uuid);
+  form.setAttribute("name", uuid);
+  return form;
+}
+
 function saveImage(imgData) {
   var uuid = UUID(); // this is for the item
   var imgUuid = UUID(); // this is for this individual image
 
-  var formTemplate = $("#inventoryForm")[0];
-  var templFragment = document.importNode(formTemplate.content, true);
-  var form = templFragment.querySelector("form");
-  form.setAttribute("action", "/item/" + uuid);
-  form.setAttribute("name", uuid);
-
+  var form = newForm(uuid);
   // Start saving the form with a success which will add the image(s)
   formSaver.attach(
     form,
@@ -43,14 +80,12 @@ function saveImage(imgData) {
 
   var img = $("#capture img");
   img.on("dragstart", function () { return false; });
-  var mc = Hammer(img[0]);
-  mc.on("swipeleft", 
-        function () {
-          // This should be a history.pushState thing so the user can
-          // use the back button or keys
-          $("#capture img").addClass("hidden");
-          $("#panel").append(form);
-        });
+  $("#panel").append(form);
+
+  // Shitty handling of the swipe management - adding an element
+  itemsList.push(img);
+  currentItemIndex++;
+  itemsList.push($(form));
 }
 
 // Snap the 'videoObject' and call 'next' with the imgData
@@ -96,5 +131,11 @@ function cameraOn () {
 
 // Start the camera
 cameraOn();
+
+// For when you want to arse about with the form without the camera
+// var form = newForm(10);
+// $("#panel").append(form);
+// $(form).removeClass("hidden");
+
 
 // app.js ends here
