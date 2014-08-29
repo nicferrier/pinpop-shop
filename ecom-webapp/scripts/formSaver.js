@@ -38,26 +38,29 @@ function taint (key, thunk) {
   }
 };
 
+// A function for sendFormJquery to use as a default successFn
+function ajaxSuccess(data, form) {
+  console.log(util.format(
+    "sendFormJquery success %s [%s]",
+    data, form));
+};
+
 // Make a thunk to send a form using jquery - this can be used as an
 // argument to 'attach'.
 //
-// A success function can be supplied, it is passed the response data
+// A successFn function can be supplied, it is passed the response data
 // and the origin form. A default that logs to the console is used.
-function sendFormJquery (form, success) {
-  function ajaxSuccess(data, form) {
-    console.log(util.format(
-      "sendFormJquery success %s [%s]",
-      data, form));
-  };
-  return function () { // the thunk you
+function sendFormJquery (form, successFn) {
+  var originForm = form;
+  return function () { // the thunk you make
+    console.log("taint called us to save!");
     if (form.checkValidity()) {
-      $.ajax(form.action, {
-        type: form.method || "POST",
+      $.ajax(originForm.action, {
+        type: originForm.method || "POST",
         dataType: "json",
         data: $(form).serialize(),
         success: function (data) {
-          var originForm = form;
-          (success || ajaxSuccess)(data, originForm);
+          (successFn || ajaxSuccess)(data, originForm);
         }
         // FIX-ME - we need an error handler that re-taints
       });
@@ -74,7 +77,7 @@ function sendFormJquery (form, success) {
 function attach(form, actionThunk) {
   var handler = function (evt) { 
     taint(
-      form.id || form.name || form.action, 
+      form.id || form.getAttribute("name") || form.action, 
       actionThunk || sendFormJquery(form)
     ); 
   };

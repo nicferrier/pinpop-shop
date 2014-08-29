@@ -21,7 +21,6 @@ function right () {
     alert("vdu7");
   }
   else {
-    console.log("itemsList:", itemsList);
     itemsList[currentItemIndex].addClass("hidden");
     itemsList[--currentItemIndex].removeClass("hidden");
   }
@@ -34,7 +33,6 @@ function left () {
     alert("vdu7");
   }
   else {
-    console.log("itemsList:", itemsList);
     itemsList[currentItemIndex].addClass("hidden");
     itemsList[++currentItemIndex].removeClass("hidden");
   }
